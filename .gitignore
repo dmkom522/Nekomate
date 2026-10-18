@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+.env
+.env.*
+!.env.example
+.local/
+coverage/
+test-results/
+playwright-report/
+*.log
+src/renderer/vendor/
+

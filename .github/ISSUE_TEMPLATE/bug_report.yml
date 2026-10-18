@@ -1,0 +1,27 @@
+name: 问题反馈
+description: 帮助我们复现并改进 Deskmate
+body:
+  - type: markdown
+    attributes:
+      value: 请不要提供 API Key、敏感截图或未经检查的学习记录。
+  - type: input
+    id: version
+    attributes:
+      label: Deskmate 版本和操作系统
+      placeholder: 例如 0.1.0 / Windows 11 x64
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤、预期行为与实际结果
+    validations:
+      required: true
+  - type: dropdown
+    id: audio
+    attributes:
+      label: 是否开启声音和转写
+      options:
+        - 未开启声音
+        - 开启系统声音，未开启转写
+        - 开启系统声音和转写

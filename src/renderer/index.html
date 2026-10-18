@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Deskmate · 看懂每一步</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="vendor/katex.min.css">
+</head>
+<body>
+  <aside class="rail">
+    <div class="brand"><span class="brand-mark">d<span>·</span></span><div>Deskmate<small>你的 AI 同桌</small></div></div>
+    <div class="rail-label">学习空间</div>
+    <button class="nav active" id="studyNav"><span>▣</span> 陪我学习 <i>01</i></button>
+    <button class="nav" id="importBtn"><span>↗</span> 打开学习记录</button>
+    <button class="nav" id="exportBtn"><span>↙</span> 导出本次记录</button>
+    <div class="rail-note"><div class="little-spark">✳</div><p>不用重新描述，<br>从卡住的地方聊起。</p><small>画面保留在本机。<br>提问时发送所选片段。</small></div>
+    <div class="rail-bottom"><button class="nav" id="settingsBtn"><span>⚙</span> API 设置 <b id="configDot"></b></button><span id="versionLabel">Deskmate</span><span class="local-label">● 本地工作空间</span></div>
+  </aside>
+
+  <main>
+    <header class="topbar"><div><span class="eyebrow">LEARN AT YOUR OWN PACE</span><h1>一起，把这一步看懂。</h1></div><button class="button subtle" id="newSessionBtn">＋ 新的学习</button></header>
+    <div id="welcome" class="welcome"><div><b>第一次见面，先接上你的 AI。</b><p>配置支持看图的模型，选一个课程窗口，就可以开始了。</p></div><button class="button dark" id="welcomeSetup">配置 API <span>↗</span></button><button class="icon-button" id="dismissWelcome" aria-label="关闭引导">×</button></div>
+    <div class="workspace">
+      <section class="watch-column">
+        <div class="section-heading"><h2><span class="live-dot" id="liveDot"></span>学习画面</h2><span class="badge" id="captureStatus">尚未开始</span></div>
+        <div class="monitor">
+          <video id="preview" autoplay muted playsinline></video>
+          <div id="emptyPreview" class="empty-preview"><div class="window-illustration"><div class="window-top"><i></i><i></i><i></i></div><div class="chalk">Ax = b</div><div class="chalk-line"></div><div class="play-symbol">▷</div></div><h3>把你的课堂，带到这里</h3><p>选择课程窗口或屏幕。<br>网站视频、本地播放器，都从同一个入口开始。</p><button class="button primary" id="chooseBtn">▣ 选择学习窗口</button></div>
+          <div class="monitor-caption" id="monitorCaption" hidden><span id="sourceName"></span><span id="sessionClock">00:00</span></div>
+        </div>
+        <div class="capture-actions"><button class="button primary" id="captureBtn">选择窗口</button><button class="button" id="stopBtn" disabled>停止采集</button><button class="button" id="snapshotBtn" disabled>保留这一刻</button></div>
+        <div class="status-grid"><div><span>已保留画面</span><strong id="frameCount">0 <small>张</small></strong></div><div><span>可回看的范围</span><strong id="bufferRange">—</strong></div><div><span>声音 / 转写</span><strong id="audioStatus">未开启</strong></div></div>
+        <section class="timeline-panel"><div class="section-heading"><h2>刚才发生了什么</h2><span class="muted">点击画面，带着它提问</span></div><div id="timeline" class="timeline"><p class="placeholder">开始陪学后，关键画面会出现在这里。</p></div><p class="footnote" id="bufferNote">保留最近最多 20 分钟的抽样画面；不是完整录像。</p></section>
+        <details class="transcript-panel"><summary>讲解记录 <span id="transcriptCount">0 段</span></summary><div id="transcripts"><p class="placeholder">开启系统声音并配置转写后，讲解会记录在这里。</p></div></details>
+        <p id="captureHealth" class="health" role="status">还没有采集内容。你随时可以停止。</p>
+      </section>
+
+      <section class="chat-panel"><div class="chat-header"><div class="assistant-avatar">d·</div><div><h2>你的同桌</h2><span id="modelStatus">等待连接模型</span></div><span class="chat-spark">✳</span></div>
+        <div class="messages" id="messages" aria-live="polite"><div class="chat-welcome" id="chatWelcome"><span class="large-spark">✳</span><h3>哪里没跟上？<br>我们一起慢慢来。</h3><p>我会结合你选的画面和讲解，<br>把省略的步骤补充清楚。</p><div class="suggestions"><button data-question="这一步为什么成立？请结合画面逐步解释。">这一步为什么成立？ <span>↗</span></button><button data-question="请用一个简单例子解释刚才的概念。">换个例子讲给我听 <span>↗</span></button><button data-question="理解刚才这段内容，我需要先掌握哪些知识？">我需要先补哪些知识？ <span>↗</span></button></div></div></div>
+        <div class="composer"><div id="selectedFrame" class="selected-frame" hidden><span id="selectedLabel"></span><button id="clearSelection" class="icon-button" aria-label="取消所选画面">×</button></div><div class="context-options"><label>带上 <select id="contextWindow"><option value="60">最近 1 分钟</option><option value="180" selected>最近 3 分钟</option><option value="600">最近 10 分钟</option><option value="1200">当前全部缓存</option></select></label><span>最多 8 张画面</span></div><form id="questionForm"><textarea id="question" rows="3" maxlength="6000" placeholder="问问这一步，或说说你哪里没懂…" aria-label="你的问题"></textarea><div class="composer-bottom"><span>Ctrl / ⌘ + Enter 发送</span><button class="button primary" id="sendBtn" type="submit">发送 ↗</button><button class="button" id="cancelBtn" type="button" hidden>取消</button></div></form><p class="send-note" id="sendNote">提问才发送画面；开启自动转写后会持续发送音频。</p></div>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="pickerDialog" class="picker-dialog"><div class="dialog-heading"><div><span class="eyebrow">CHOOSE YOUR CLASSROOM</span><h2>今天，在哪个窗口学习？</h2></div><button class="icon-button" data-close="pickerDialog" aria-label="关闭窗口选择">×</button></div><div class="picker-toolbar"><p>只采集你选择的画面。尽量选择具体窗口。</p><button class="button" id="refreshSources">刷新列表</button></div><label class="check-row"><input type="checkbox" id="captureAudio"> 同时采集系统声音 <span>包含其他应用的声音</span></label><p id="audioHint" class="footnote"></p><div class="source-grid" id="sourceGrid"></div><p id="pickerError" class="error-text" role="alert"></p></dialog>
+
+  <dialog id="settingsDialog" class="settings-dialog"><div class="dialog-heading"><div><span class="eyebrow">BRING YOUR OWN AI</span><h2>接上你喜欢的模型</h2></div><button class="icon-button" data-close="settingsDialog" aria-label="关闭 API 设置">×</button></div><p class="muted">使用 OpenAI 兼容接口。视觉模型必须支持图片输入；转写服务可单独配置。</p><form id="settingsForm"><fieldset><legend><span>01</span> 视觉问答 <b>必选</b></legend><label>API 基础地址<input id="visionUrl" type="url" placeholder="https://api.example.com/v1" required></label><div class="form-row"><label>模型名称<input id="visionModel" placeholder="服务商提供的视觉模型 ID" required></label><label>API Key<input id="visionKey" type="password" autocomplete="off" placeholder="填写你的密钥"></label></div><label class="check-row"><input id="clearVisionKey" type="checkbox"> 清除已保存的视觉密钥</label></fieldset><fieldset><legend><span>02</span> 语音转写 <b>可选</b></legend><label class="check-row"><input id="autoTranscribe" type="checkbox"> 采集到声音时自动转写</label><label>转写 API 基础地址<input id="speechUrl" type="url" placeholder="https://api.example.com/v1"></label><div class="form-row"><label>转写模型<input id="speechModel" placeholder="服务商提供的转写模型 ID"></label><label>API Key<input id="speechKey" type="password" autocomplete="off" placeholder="可以与视觉服务不同"></label></div><label class="check-row"><input id="clearSpeechKey" type="checkbox"> 清除已保存的转写密钥</label><p class="footnote">音频按约 30 秒分段上传。开启会产生服务商费用；默认关闭。</p></fieldset><p class="footnote">密钥使用系统加密存储。课程内容仅发给你配置的服务商，Deskmate 不提供中转服务器。</p><p id="settingsError" class="error-text" role="alert"></p><div class="dialog-footer"><span id="settingsStatus" role="status"></span><button type="submit" class="button primary" id="saveSettingsBtn">保存配置</button></div></form></dialog>
+
+  <dialog id="frameDialog" class="frame-dialog"><div class="dialog-heading"><h2 id="frameTitle">画面</h2><button class="icon-button" data-close="frameDialog" aria-label="关闭画面">×</button></div><img id="frameImage" alt="保留的课程画面"><button id="askFrameBtn" class="button primary">带上这张画面提问 ↗</button></dialog>
+  <dialog id="confirmDialog" class="confirm-dialog"><h2>开始新的学习？</h2><p>会清空当前画面和对话。需要留存的话，请先导出本次记录。</p><div class="dialog-footer"><button class="button" data-close="confirmDialog">继续当前学习</button><button class="button primary" id="confirmNew">开始新的学习</button></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>

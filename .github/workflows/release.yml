@@ -1,0 +1,64 @@
+name: Desktop CI and Release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Ensure Electron runtime is installed
+        run: node node_modules/electron/install.js
+      - run: npm test
+      - run: npm run check
+      - run: npm run test:desktop
+      - name: Build Windows installer
+        run: npm run dist:win
+      - name: SHA256 checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem release/*.exe | ForEach-Object { "$( (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Set-Content release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deskmate-windows-x64
+          path: |
+            release/*.exe
+            release/SHA256SUMS.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-test-evidence
+          path: test-results/
+          if-no-files-found: ignore
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deskmate-windows-x64
+          path: release
+      - name: Publish downloadable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" release/*.exe release/SHA256SUMS.txt --title "Deskmate $RELEASE_TAG" --notes-file docs/RELEASE_NOTES.md --verify-tag
