@@ -1,0 +1,28 @@
+Qwen3-ASR-GGUF inference components — provenance notice
+
+Source: https://github.com/HaujetZhao/Qwen3-ASR-GGUF
+Pinned commit: e790e3bfe9c1c52453da1166df236950a8a8b036
+Local adaptations: llama.cpp b11724 ctypes layout compatibility; minimal imports;
+disable persistent inference logging.
+
+The upstream inference implementation is a downloaded build/test dependency.
+Its source files are not included in Nekomate's tracked source tree. Preparation
+uses the pinned archive with SHA-256 verification and applies the local adaptation
+patches before placing the runtime under .local/qwen-speech.
+
+License check recorded on 2026-10-27: the inspected pinned source archive did not
+contain a root LICENSE or COPYING file, and the selected qwen_asr_gguf inference
+files did not include an explicit redistribution grant. This notice records
+provenance and the check performed; it does not grant redistribution permission
+or state that the upstream implementation is licensed under Nekomate's MIT terms.
+
+Qwen/Qwen3-ASR-0.6B model: Apache-2.0; see Apache-2.0.txt.
+That model license does not establish the license of HaujetZhao's inference code.
+Native runtime: ggml-org/llama.cpp b11724, MIT; see llama.cpp-LICENSE.txt.
+Python runtime: Python Software Foundation License; see Python-LICENSE.txt.
+Other dependency notices are included with their runtime packages.
+
+Nekomate's MIT license covers its own code only. Automated publication of binary
+packages containing this implementation is disabled by default. Maintainers must
+verify the applicable upstream redistribution permission before enabling that
+publication gate; a workflow setting is not itself permission.

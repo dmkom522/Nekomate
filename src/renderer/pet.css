@@ -1,0 +1,31 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden;font-family:'Segoe UI','Microsoft YaHei',sans-serif;user-select:none}
+/* Status remains available to assistive technology, without a floating label. */
+#petState{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+button{border:0;background:none;padding:0;cursor:pointer}
+#petButton{position:absolute;inset:0;width:100%;height:100%;touch-action:none;outline-offset:-3px}
+svg{pointer-events:none;display:block}
+.cat-art{position:absolute;left:calc(50% - 60px);top:0;width:120px;height:110px;shape-rendering:geometricPrecision}
+.eyes{transform-origin:60px 48px;animation:blink 7s infinite}
+.study-book{display:none}
+body[data-capturing=true] .study-book{display:inline}
+body[data-capturing=true] .cat .eyes,body[data-capturing=true] .cat .tail{animation:none}
+.dock-peek{display:none;position:absolute;left:var(--dock-x,50%);top:var(--dock-y,50%);width:80px;height:40px;overflow:hidden;transform:translate(-50%,-50%)}
+.dock-head{width:80px;height:68px;transform:translateY(26px);transition:transform 160ms cubic-bezier(.4,0,.2,1)}
+/* Restoring retains its dock edge until settlement; keep the animated cat drawable. */
+body[data-docked]:not([data-docked='']):not([data-motion]) .cat-art{display:none}
+body[data-docked]:not([data-docked='']) .dock-peek{display:block}
+body[data-docked=left] .dock-peek{transform:translate(-50%,-50%) rotate(90deg)}
+body[data-docked=right] .dock-peek{transform:translate(-50%,-50%) rotate(-90deg)}
+body[data-docked=top] .dock-peek{transform:translate(-50%,-50%) rotate(180deg)}
+body[data-docked=bottom] .dock-peek{transform:translate(-50%,-50%) rotate(0deg)}
+body:not([data-motion])[data-peeking=true] .dock-head,body:not([data-motion]) #petButton:is(:hover,:focus-visible) .dock-head{transform:translateY(12px)}
+body[data-motion] .cat-art,body[data-motion] .dock-peek{display:block;will-change:transform,opacity}
+body[data-motion] .dock-head{transition:none}
+body[data-motion] #petButton{cursor:default}
+button:focus-visible{outline:2px solid #9c7350;border-radius:6px}
+body[data-status=thinking] .tail{animation:breathe 1.4s infinite}
+body[data-status=error] .tail{stroke:#ac795b}
+@keyframes blink{0%,42%,46%,100%{transform:scaleY(1)}44%{transform:scaleY(.1)}}
+@keyframes breathe{50%{opacity:.5}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

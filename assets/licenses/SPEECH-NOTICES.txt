@@ -1,0 +1,15 @@
+Nekomate local speech components
+
+Qwen3-ASR-0.6B INT4 ONNX / Q4_K GGUF model, Qwen / Alibaba.
+https://huggingface.co/Qwen/Qwen3-ASR-0.6B (Apache-2.0; see Apache-2.0.txt).
+Converted assets: https://github.com/HaujetZhao/Qwen3-ASR-GGUF/releases/tag/models
+Inference implementation provenance and local adaptations: Qwen-GGUF-NOTICE.txt.
+The inference implementation is downloaded as a pinned build/test dependency;
+its redistribution permission is not established by the Qwen model license.
+Pinned source: e790e3bfe9c1c52453da1166df236950a8a8b036.
+
+llama.cpp b11724, ggml-org. MIT; see llama.cpp-LICENSE.txt.
+ONNX Runtime DirectML, Microsoft. MIT; see ONNX-Runtime-LICENSE.txt.
+CPython 3.12.10, Python Software Foundation; see Python-LICENSE.txt.
+Other dependency notices are in qwen-speech/packages/*.dist-info, and runtime file hashes are in qwen-speech/manifest.json.
+The application's MIT license does not replace third-party terms.

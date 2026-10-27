@@ -10,4 +10,5 @@ test-results/
 playwright-report/
 *.log
 src/renderer/vendor/
+src/native/qwen/
 

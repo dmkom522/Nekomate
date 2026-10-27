@@ -5,13 +5,15 @@ import { FrameBuffer, pixelChange, selectEvenly, validateSession } from '../src/
 
 const image = 'data:image/jpeg;base64,/9j/2Q==';
 test('multiple visual frames and aligned transcripts reach the actual model payload', () => {
-  const context = validateContext({ question: '为什么第二行变化？', frames: [{ time: 10.5, image }, { time: 15, image }], transcripts: [{ start: 9, end: 16, text: '第二行减去第一行的两倍' }] });
+  const context = validateContext({ question: '为什么第二行变化？', currentTime: 15, frames: [{ time: 10.5, image }, { time: 15, image }], transcripts: [{ start: 9, end: 16, text: '第二行减去第一行的两倍' }] });
   const messages = buildMessages(context), parts = messages.at(-1).content;
   assert.equal(parts.filter(p => p.type === 'image_url').length, 2);
   assert.equal(parts.filter(p => p.type === 'image_url')[0].image_url.url, image);
   assert.match(parts.find(p => p.text?.startsWith('[F2]')).text, /00:15/);
+  assert.match(parts.find(p => p.text?.startsWith('[F2]')).text, /提问时的新截图/);
+  assert.doesNotMatch(parts.find(p => p.text?.startsWith('[F1]')).text, /提问时的新截图/);
   assert.match(parts.find(p => p.text?.startsWith('[T1]')).text, /00:09–00:16/);
-  assert.match(messages[0].content, /不是原课程播放进度/);
+  assert.match(messages[0].content, /相对时间.*(?:不等于|不是).*播放进度/);
 });
 test('rejects fabricated system roles, external image URLs and invalid timestamps', () => {
   for (const invalid of [

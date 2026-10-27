@@ -21,12 +21,14 @@ test('real local HTTP transport carries images, auth, history and multipart audi
     const chunks = []; for await (const chunk of req) chunks.push(chunk);
     requests.push({ url: req.url, headers: req.headers, body: Buffer.concat(chunks) });
     res.setHeader('Content-Type', 'application/json');
+    if (req.method === 'GET') { res.end(JSON.stringify({ data: [{ id: 'mock-vision', capabilities: { image_input: { supported: true }, transcription: { supported: true } } }] })); return; }
     res.end(JSON.stringify(req.url.endsWith('transcriptions') ? { text: '两边同时乘以 A 的逆矩阵' } : { choices: [{ message: { content: '依据 [F1]，这一步是消元。' } }], usage: { total_tokens: 42 } }));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
     const endpoint = { baseUrl: `http://127.0.0.1:${server.address().port}/v1`, model: 'mock-vision', apiKey: 'test-key' };
-    const config = { vision: endpoint, speech: { ...endpoint, model: 'mock-asr' } };
+    const config = normalizeConfig({ vision: endpoint, transcription: { useSelectedModel: true }, speech: { baseUrl: 'https://unused.example/v1', apiKey: 'obsolete-secret', model: 'old-asr' } });
+    assert.equal(config.speech, undefined);
     const image = 'data:image/jpeg;base64,/9j/2Q==';
     const result = await answerQuestion(config, { question: '解释一下', frames: [{ image, time: 12 }], transcripts: [], history: [{ role: 'user', content: '之前的问题' }] });
     assert.match(result.answer, /消元/); assert.equal(result.sources[0].time, 12); assert.equal(result.usage.total_tokens, 42);
@@ -36,9 +38,13 @@ test('real local HTTP transport carries images, auth, history and multipart audi
     assert.equal(payload.messages[1].content, '之前的问题');
     const transcript = await transcribeAudio(config, Buffer.from('test-audio-bytes'), 'audio/webm');
     assert.match(transcript.text, /逆矩阵/);
-    assert.match(requests[1].headers['content-type'], /multipart\/form-data; boundary=/);
-    assert.match(requests[1].body.toString(), /test-audio-bytes/);
-    assert.match(requests[1].body.toString(), /filename="segment.webm"/);
+    assert.equal(requests[1].url, '/v1/models');
+    assert.equal(requests[1].headers.authorization, 'Bearer test-key');
+    assert.equal(requests[2].headers.authorization, 'Bearer test-key');
+    assert.match(requests[2].headers['content-type'], /multipart\/form-data; boundary=/);
+    assert.match(requests[2].body.toString(), /test-audio-bytes/);
+    assert.match(requests[2].body.toString(), /filename="segment.webm"/);
+    assert.match(requests[2].body.toString(), /mock-vision/);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });
 

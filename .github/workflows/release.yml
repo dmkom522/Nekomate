@@ -22,18 +22,23 @@ jobs:
       - run: npm ci
       - name: Ensure Electron runtime is installed
         run: node node_modules/electron/install.js
+      - name: Prepare verified offline speech models
+        run: npm run prepare:speech
       - run: npm test
       - run: npm run check
       - run: npm run test:desktop
       - name: Build Windows installer
+        if: vars.ALLOW_QWEN_BINARY_REDISTRIBUTION == 'true'
         run: npm run dist:win
       - name: SHA256 checksums
+        if: vars.ALLOW_QWEN_BINARY_REDISTRIBUTION == 'true'
         shell: pwsh
         run: |
           Get-ChildItem release/*.exe | ForEach-Object { "$( (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Set-Content release/SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
+        if: vars.ALLOW_QWEN_BINARY_REDISTRIBUTION == 'true'
         with:
-          name: deskmate-windows-x64
+          name: nekomate-windows-x64
           path: |
             release/*.exe
             release/SHA256SUMS.txt
@@ -46,7 +51,7 @@ jobs:
           if-no-files-found: ignore
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && vars.ALLOW_QWEN_BINARY_REDISTRIBUTION == 'true'
     needs: windows
     runs-on: ubuntu-latest
     permissions:
@@ -55,10 +60,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: deskmate-windows-x64
+          name: nekomate-windows-x64
           path: release
       - name: Publish downloadable release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" release/*.exe release/SHA256SUMS.txt --title "Deskmate $RELEASE_TAG" --notes-file docs/RELEASE_NOTES.md --verify-tag
+        run: gh release create "$RELEASE_TAG" release/*.exe release/SHA256SUMS.txt --title "Nekomate $RELEASE_TAG" --notes-file docs/RELEASE_NOTES.md --verify-tag

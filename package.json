@@ -1,8 +1,8 @@
 {
-  "name": "deskmate",
+  "name": "nekomate",
   "version": "0.1.0",
   "private": true,
-  "description": "Deskmate — 看懂每一步。可连接自选模型 API 的桌面课程助教。",
+  "description": "Nekomate — 看懂每一步。可连接自选模型 API 的桌面课程助教。",
   "author": "dmkom522",
   "repository": {
     "type": "git",
@@ -16,13 +16,14 @@
   },
   "scripts": {
     "build:ui": "node scripts/build-ui.mjs",
-    "prestart": "npm run build:ui",
-    "predev": "npm run build:ui",
+    "prepare:speech": "node scripts/prepare-speech.mjs",
+    "prestart": "npm run prepare:speech && npm run build:ui",
+    "predev": "npm run prepare:speech && npm run build:ui",
     "pretest:desktop": "npm run build:ui",
-    "prepack": "npm run build:ui",
-    "predist:win": "npm run build:ui",
-    "predist:mac": "npm run build:ui",
-    "predist:linux": "npm run build:ui",
+    "prepack": "npm run prepare:speech && npm run build:ui",
+    "predist:win": "npm run prepare:speech && npm run build:ui",
+    "predist:mac": "npm run prepare:speech && npm run build:ui",
+    "predist:linux": "npm run prepare:speech && npm run build:ui",
     "start": "electron .",
     "dev": "electron .",
     "test": "node --test tests/*.test.mjs",
@@ -35,35 +36,49 @@
   },
   "build": {
     "appId": "app.deskmate.desktop",
-    "productName": "Deskmate",
+    "productName": "Nekomate",
     "asar": true,
     "directories": {
       "output": "release"
     },
     "files": [
       "src/**/*",
+      "!src/native/qwen/**",
       "package.json",
       "LICENSE",
-      "assets/icon.ico"
+      "assets/nekomate.ico",
+      "assets/licenses/**/*"
     ],
-    "artifactName": "Deskmate-${version}-${os}-${arch}.${ext}",
+    "extraResources": [],
+    "artifactName": "Nekomate-${version}-${os}-${arch}.${ext}",
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico",
-      "signAndEditExecutable": true
+      "icon": "assets/nekomate.ico",
+      "signAndEditExecutable": true,
+      "extraResources": [
+        {
+          "from": ".local/qwen-speech",
+          "to": "qwen-speech",
+          "filter": [
+            "**/*",
+            "!**/__pycache__/**",
+            "!**/*.pyc"
+          ]
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Deskmate"
+      "shortcutName": "Nekomate"
     },
     "mac": {
       "target": "dmg",
       "category": "public.app-category.education",
       "extendInfo": {
-        "NSScreenCaptureUsageDescription": "Deskmate 使用您选择的窗口画面作为课程问答的上下文。"
+        "NSScreenCaptureUsageDescription": "Nekomate 使用您选择的窗口画面作为课程问答的上下文。"
       }
     },
     "linux": {
