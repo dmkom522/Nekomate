@@ -14,3 +14,14 @@ test('renders matrices, inline math and code without interpreting raw HTML', () 
 test('does not create active links from untrusted math commands', () => {
   assert.doesNotMatch(renderAnswer('$\\href{javascript:alert(1)}{click}$'), /href="javascript:/);
 });
+
+test('renders the prompted LaTeX delimiters as inline and display formulas', () => {
+  const inline = String.raw`向量 \(x_i^2\) 与矩阵 \(W_q\)。`;
+  const display = String.raw`\[
+q = W_q x
+\]`;
+  const html = renderAnswer(`${inline}\n\n${display}\n\n继续解释。`);
+  assert.equal((html.match(/class="katex"/g) ?? []).length, 3);
+  assert.equal((html.match(/class="math-block"/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /katex-error|<code>|\\\(|\\\)|\\\[|\\\]/);
+});

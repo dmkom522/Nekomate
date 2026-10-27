@@ -837,7 +837,7 @@ test('math positioning styles apply in the chat without clipping subscripts, fra
     await page.evaluate(() => window.deskmate.expandBubble(true));
     await page.evaluate(async () => {
       const { renderAnswer } = await import('./vendor/format.mjs');
-      const formulas = [String.raw`\[q = W_q x,\quad k = W_k x,\quad v = W_v x\]`, String.raw`\[\frac{\sum_{i=1}^{n} x_i^2}{\sqrt{d_k}} + \begin{bmatrix}1&2\\3&4\end{bmatrix}\]`, '行内公式 $x_i^2$。'];
+      const formulas = [String.raw`\[q = W_q x,\quad k = W_k x,\quad v = W_v x\]`, String.raw`\[\frac{\sum_{i=1}^{n} x_i^2}{\sqrt{d_k}} + \begin{bmatrix}1&2\\3&4\end{bmatrix}\]`, String.raw`行内公式 \(x_i^2\)。`];
       window.mathPolicyErrors = [];
       document.addEventListener('securitypolicyviolation', event => window.mathPolicyErrors.push(event.effectiveDirective));
       document.querySelector('#messages').innerHTML = formulas.map(text => `<article class="message assistant"><div class="message-body formatted">${renderAnswer(text)}</div></article>`).join('');

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { answerQuestion, analyzeFrame, normalizeConfig, transcribeAudio } from '../src/core/provider.mjs';
-import { NEKOMATE_SYSTEM_PROMPT, systemPrompt } from '../src/core/prompts.mjs';
+import { NEKOMATE_SYSTEM_PROMPT, systemPrompt, taskInstructions } from '../src/core/prompts.mjs';
 
 const image = 'data:image/jpeg;base64,/9j/2Q==';
 
@@ -60,6 +60,17 @@ test('the shared prompt covers nonlinear learning, evidence boundaries, sources 
   assert.match(NEKOMATE_SYSTEM_PROMPT, /不编造|不要编造|不得编造|不虚构|不要声称|不能声称/);
   assert.notEqual(systemPrompt('answer'), systemPrompt('visual-note'));
   assert.notEqual(systemPrompt('answer'), systemPrompt('transcription'));
+});
+
+test('answer instructions require parenthesis and bracket math delimiters without dollar delimiters', () => {
+  for (const prompt of [systemPrompt('answer'), taskInstructions('answer')]) {
+    assert.ok(prompt.includes(String.raw`\(...\)`));
+    assert.ok(prompt.includes(String.raw`\[...\]`));
+    assert.equal(prompt.includes(String.fromCharCode(36)), false);
+    assert.match(prompt, /禁止使用美元符号/);
+    assert.match(prompt, /不要把公式放进反引号或代码块/);
+    assert.match(prompt, /起止定界符分别单独占一行/);
+  }
 });
 
 for (const protocol of ['openai', 'anthropic']) test(`${protocol} HTTP answer and visual-note requests share the global system prompt with distinct tasks`, async () => {
