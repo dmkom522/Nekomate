@@ -41,18 +41,28 @@ for (const action of ['cancel', 'timeout', 'dispose']) {
   });
 }
 test('bundled native recognizer returns no invented text for silence and can restart after idle release', {
-  skip: !existsSync(path.join(defaultSpeechRuntimeDir(), 'manifest.json')), timeout: 30000,
-}, async () => {
+  // Two cold starts may each use the production 90-second request allowance.
+  skip: !existsSync(path.join(defaultSpeechRuntimeDir(), 'manifest.json')), timeout: 190000,
+}, async t => {
+  const started = performance.now();
+  const phase = (name, details = '') => t.diagnostic(`${name}: elapsed_ms=${Math.round(performance.now() - started)}${details ? ` ${details}` : ''}`);
   const speech = new LocalSpeech({ idleMs: 50 });
   try {
+    phase('first-transcribe-start', 'audio_seconds=120');
     const result = await speech.transcribe(silence(120), 'audio/wav');
+    phase('first-transcribe-complete', `mode=${result.mode}`);
     assert.match(result.model, /^Qwen3-ASR/); assert.equal(result.source, 'local'); assert.equal(result.text, ''); assert.deepEqual(result.segments, []);
     const first = speech.child, closed = once(first, 'exit');
+    phase('idle-release-wait');
     await closed;
+    phase('idle-release-complete');
     assert.equal(speech.child, null);
-    assert.equal((await speech.transcribe(silence(1), 'audio/wav')).text, '');
+    phase('second-transcribe-start', 'audio_seconds=1');
+    const second = await speech.transcribe(silence(1), 'audio/wav');
+    phase('second-transcribe-complete', `mode=${second.mode}`);
+    assert.equal(second.text, '');
     assert.notEqual(speech.child, first);
-  } finally { speech.dispose(); }
+  } finally { speech.dispose(); phase('disposed'); }
 });
 
 function fixture(scenario,calls){return (_file,args,options)=>{calls.push(args.at(-1));return spawn(process.execPath,[fileURLToPath(new URL('./fixtures/speech-worker.mjs',import.meta.url)),scenario,args.at(-1)],options);};}
