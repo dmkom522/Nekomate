@@ -66,4 +66,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" release/*.exe release/SHA256SUMS.txt --title "Nekomate $RELEASE_TAG" --notes-file docs/RELEASE_NOTES.md --verify-tag
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release already exists; preserving its published assets."
+            exit 0
+          fi
+          gh release create "$RELEASE_TAG" release/*.exe release/SHA256SUMS.txt --title "Nekomate $RELEASE_TAG" --notes-file docs/RELEASE_NOTES.md --verify-tag

@@ -1,28 +1,41 @@
-Qwen3-ASR-GGUF inference components — provenance notice
+Qwen3-ASR-GGUF inference components — license and modification notice
 
 Source: https://github.com/HaujetZhao/Qwen3-ASR-GGUF
 Pinned commit: e790e3bfe9c1c52453da1166df236950a8a8b036
-Local adaptations: llama.cpp b11724 ctypes layout compatibility; minimal imports;
-disable persistent inference logging.
+Nekomate modifications: llama.cpp b11724 ctypes layout compatibility; minimal
+package imports; disable persistent inference logging. The three modified Python
+files carry prominent Nekomate modification notices. Other selected Python files
+are copied unchanged from the verified pinned source archive.
 
-The upstream inference implementation is a downloaded build/test dependency.
+The upstream inference implementation is a downloaded build/runtime dependency.
 Its source files are not included in Nekomate's tracked source tree. Preparation
 uses the pinned archive with SHA-256 verification and applies the local adaptation
 patches before placing the runtime under .local/qwen-speech.
 
-License check recorded on 2026-10-27: the inspected pinned source archive did not
-contain a root LICENSE or COPYING file, and the selected qwen_asr_gguf inference
-files did not include an explicit redistribution grant. This notice records
-provenance and the check performed; it does not grant redistribution permission
-or state that the upstream implementation is licensed under Nekomate's MIT terms.
+License basis recorded for this release on 2026-10-27: the project maintainer
+(user) supplied Apache License 2.0 terms and expressly confirmed that the supplied
+license applies to this upstream inference implementation and permits publishing
+the binary package. The supplied text ends with "Copyright 2026 Alibaba Cloud".
+That copyright statement is preserved exactly as supplied; it is not replaced
+with a Nekomate copyright claim.
 
-Qwen/Qwen3-ASR-0.6B model: Apache-2.0; see Apache-2.0.txt.
-That model license does not establish the license of HaujetZhao's inference code.
+The original supplied text is archived without changes as
+Qwen-GGUF-LICENSE-PROVIDED.txt (SHA-256:
+d9c1a708b11045a6df932ec5f34a2b6b28dcd0317d25d1da752b9ebf1aa666e5).
+A normally formatted copy of the Apache License 2.0 terms is also included as
+Apache-2.0.txt. Both are shipped under assets/licenses in the application package.
+
+This license applicability is a maintainer-supplied confirmation, not a license
+independently located in the pinned GitHub snapshot. The earlier independent
+inspection of that snapshot found no root LICENSE or COPYING file and no explicit
+license declaration in the selected inference files. This notice records both
+the inspected provenance and the subsequently supplied release basis accurately.
+
+Qwen/Qwen3-ASR-0.6B model: Apache-2.0; see Apache-2.0.txt. The model's license is
+separate from the inference implementation confirmation recorded above.
 Native runtime: ggml-org/llama.cpp b11724, MIT; see llama.cpp-LICENSE.txt.
 Python runtime: Python Software Foundation License; see Python-LICENSE.txt.
 Other dependency notices are included with their runtime packages.
 
-Nekomate's MIT license covers its own code only. Automated publication of binary
-packages containing this implementation is disabled by default. Maintainers must
-verify the applicable upstream redistribution permission before enabling that
-publication gate; a workflow setting is not itself permission.
+Nekomate's MIT license covers its own code only. It does not replace applicable
+third-party license terms, copyright statements, or attribution notices.

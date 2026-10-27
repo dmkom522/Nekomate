@@ -11,15 +11,15 @@ export const QWEN_SOURCE = Object.freeze({
   bytes: 29954738,
 });
 
-// Hashes identify the upstream files and the already-tested adapted output.
+// Hashes identify the upstream files and adapted output, including modification notices.
 // Upstream implementation bodies are obtained from the verified archive, not vendored here.
 export const ENGINE_FILES = Object.freeze([
-  ['__init__.py', 'febac5984210a479129ecf20de19ac3a5c1a5360c24700b70f6b63e39254cf90', '04edaa577bcd92df0f6fd7ad71ad95a99f00d7907c3ae7fe436e2c2784a21349'],
-  ['inference/__init__.py', '034ed4ae2992a3f7c1ea104bd282ca9041f36d8824201f042092f096304fe649', 'a3cf0a9c66641b19ebd2a4659b9f08ceffb9d75a164b8f708457868618a418c5'],
+  ['__init__.py', 'febac5984210a479129ecf20de19ac3a5c1a5360c24700b70f6b63e39254cf90', 'f00c73e08dff7d99e1d9f92a31321b97b02f7fb7b1e2f7f8603e23f803d2eaca'],
+  ['inference/__init__.py', '034ed4ae2992a3f7c1ea104bd282ca9041f36d8824201f042092f096304fe649', '02f91b0565bfa96aeaebccd021f7ed7f113078b4588da9c9848b846925416493'],
   ['inference/asr.py', '38e420d75598cd85d689a665ab20af84f9b01f120fe0c2b1b5275cca49bd11fa', '38e420d75598cd85d689a665ab20af84f9b01f120fe0c2b1b5275cca49bd11fa'],
   ['inference/chinese_itn.py', '309cc4d5e4651c37b4000154451ed9d0bd680c98650230c4357a54594c3fc04e', '309cc4d5e4651c37b4000154451ed9d0bd680c98650230c4357a54594c3fc04e'],
   ['inference/encoder.py', 'b665aa303e2fff5d7106450d34e9faadb0a7630f62771a628bbe57c794e08fee', 'b665aa303e2fff5d7106450d34e9faadb0a7630f62771a628bbe57c794e08fee'],
-  ['inference/llama.py', 'c436611fa864ac2dc873a19962562073508092d85015144ff67fb47514d4ce8b', 'e11b38c063be84a9fa0ef78eeb079ce17c46ce6d863e724bf74ed988a09c458e'],
+  ['inference/llama.py', 'c436611fa864ac2dc873a19962562073508092d85015144ff67fb47514d4ce8b', 'b7fbedd8c5e8d4e33c526e64372d202fdbd67a8a54164b94af608f89af945093'],
   ['inference/schema.py', 'b651a3f49c6738b0d336eafdd5012efd62467e3a4ca1b3c498ac507e2588e54b', 'b651a3f49c6738b0d336eafdd5012efd62467e3a4ca1b3c498ac507e2588e54b'],
   ['inference/utils.py', '107b176190a3705ec4d2357ae46994df81bd56395707415ae48e19938edd6bf7', '107b176190a3705ec4d2357ae46994df81bd56395707415ae48e19938edd6bf7'],
 ]);
@@ -43,9 +43,18 @@ function patchLayout(source, name, modify, groups) {
   if (cursor !== fields.length) throw new Error(`Invalid Qwen ABI formatting: ${name}`);
   return source.replace(pattern, `class ${name}(ctypes.Structure):\n    _fields_ = [\n${lines.join('\n')}\n    ]\n`);
 }
+function modified(name, body) {
+  const changes = {
+    '__init__.py': 'minimal package imports and non-persistent logging.',
+    'inference/__init__.py': 'load only the ASR engine and its configuration.',
+    'inference/llama.py': 'llama.cpp b11724 ctypes ABI and disabled file logging.',
+  };
+  const notice = `# Modified by Nekomate: ${changes[name]}\r\n# Adapted from Qwen3-ASR-GGUF commit ${QWEN_SOURCE.commit}.\r\n`;
+  return Buffer.concat([Buffer.from(notice), body]);
+}
 function adapt(name, bytes) {
-  if (name === '__init__.py') return Buffer.from('import logging\r\nlogger=logging.getLogger("nekomate.qwen")\r\nlogger.addHandler(logging.NullHandler())\r\nlogger.propagate=False\r\n');
-  if (name === 'inference/__init__.py') return Buffer.from('from .. import logger\r\nfrom .asr import QwenASREngine\r\nfrom .schema import ASREngineConfig\r\n');
+  if (name === '__init__.py') return modified(name, Buffer.from('import logging\r\nlogger=logging.getLogger("nekomate.qwen")\r\nlogger.addHandler(logging.NullHandler())\r\nlogger.propagate=False\r\n'));
+  if (name === 'inference/__init__.py') return modified(name, Buffer.from('from .. import logger\r\nfrom .asr import QwenASREngine\r\nfrom .schema import ASREngineConfig\r\n'));
   if (name !== 'inference/llama.py') return bytes;
   let source = bytes.toString('utf8');
   if ((source.match(/LOGS = True/g) ?? []).length !== 1) throw new Error('Pinned Qwen log setting no longer matches');
@@ -62,7 +71,7 @@ function adapt(name, bytes) {
     type('samplers', 'ctypes.c_void_p'); fields.push(['ctx_other', 'ctypes.c_void_p']);
   }, [2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1]);
   // Preserve the CRLF bytes of the previously verified Windows runtime.
-  return Buffer.from(source.replace('LOGS = True', 'LOGS = False').replace(/\r?\n/g, '\r\n'));
+  return modified(name, Buffer.from(source.replace('LOGS = True', 'LOGS = False').replace(/\r?\n/g, '\r\n')));
 }
 
 export async function prepareQwenEngine({ root, destination, download }) {

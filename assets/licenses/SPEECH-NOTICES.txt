@@ -4,8 +4,15 @@ Qwen3-ASR-0.6B INT4 ONNX / Q4_K GGUF model, Qwen / Alibaba.
 https://huggingface.co/Qwen/Qwen3-ASR-0.6B (Apache-2.0; see Apache-2.0.txt).
 Converted assets: https://github.com/HaujetZhao/Qwen3-ASR-GGUF/releases/tag/models
 Inference implementation provenance and local adaptations: Qwen-GGUF-NOTICE.txt.
-The inference implementation is downloaded as a pinned build/test dependency;
-its redistribution permission is not established by the Qwen model license.
+The inference implementation is downloaded as a pinned build/runtime dependency.
+For this release the project maintainer (user) supplied Apache License 2.0 terms
+and expressly confirmed that they apply to the inference implementation and
+permit binary publication. This is a maintainer-supplied confirmation, not a
+license independently found in the pinned upstream snapshot. The supplied
+"Copyright 2026 Alibaba Cloud" statement is preserved in
+Qwen-GGUF-LICENSE-PROVIDED.txt; see also Apache-2.0.txt and the provenance details
+in Qwen-GGUF-NOTICE.txt. The model license and this supplied confirmation are
+separate bases.
 Pinned source: e790e3bfe9c1c52453da1166df236950a8a8b036.
 
 llama.cpp b11724, ggml-org. MIT; see llama.cpp-LICENSE.txt.

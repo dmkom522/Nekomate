@@ -6,7 +6,7 @@
   "author": "dmkom522",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dmkom522/Deskmate.git"
+    "url": "https://github.com/dmkom522/Nekomate.git"
   },
   "type": "module",
   "main": "src/main.mjs",
