@@ -36,6 +36,10 @@ jobs:
       - run: node node_modules/electron/install.js
       - name: Prepare pinned native macOS speech runtime
         run: npm run prepare:speech
+      - name: Diagnose native runtime loading
+        run: |
+          printf '%s\n' '{"id":1,"kind":"warmup"}' | NEKOMATE_SPEECH_DIAGNOSTICS=1 .local/qwen-speech/python/bin/python3 -I -u .local/qwen-speech/worker.py cpu | tee .local/mac-native-load.json
+          grep -q '"warmed": true' .local/mac-native-load.json
       - run: npm run check
       - name: Test audio processing, protocol and math
         run: node --test tests/platform.test.mjs tests/local-speech.test.mjs tests/audio-buffer.test.mjs tests/incremental-audio.test.mjs tests/system-prompt.test.mjs tests/format.test.mjs

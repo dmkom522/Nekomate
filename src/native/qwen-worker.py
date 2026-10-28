@@ -134,5 +134,8 @@ while True:
             raise ValueError("invalid-kind")
         print(json.dumps({"id": request_id, "result": result}, ensure_ascii=False), flush=True)
     except Exception:
+        if os.environ.get('NEKOMATE_SPEECH_DIAGNOSTICS') == '1':
+            import traceback
+            traceback.print_exc(file=sys.stderr)
         print(json.dumps({"id": request_id, "error": "gpu-unavailable" if mode == "gpu" else "transcription-failed"}), flush=True)
         break
