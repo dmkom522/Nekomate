@@ -50,7 +50,7 @@ jobs:
       - name: Verify actual DMG content, launch and local Chinese/English speech
         run: node scripts/smoke-macos.mjs release/Nekomate-0.1.3-mac-${{ matrix.arch }}.dmg
       - name: Hash installers
-        run: shasum -a 256 release/*.dmg > release/SHA256SUMS-mac-${{ matrix.arch }}.txt
+        run: (cd release && shasum -a 256 *.dmg) > release/SHA256SUMS-mac-${{ matrix.arch }}.txt
       - uses: actions/upload-artifact@v4
         with:
           name: nekomate-macos-${{ matrix.arch }}

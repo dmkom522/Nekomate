@@ -49,7 +49,7 @@ async function walk(dir) {
 }
 await mkdir(destination, { recursive: true }); await mkdir(cache, { recursive: true });
 let previous; try { previous = JSON.parse(await readFile(path.join(destination, 'manifest.json'), 'utf8')); } catch {}
-let ready = previous?.platform === 'darwin' && previous.arch === arch && JSON.stringify(previous.wheels) === JSON.stringify(wheels) && previous.files?.length > 100;
+let ready = previous?.runtimeRevision === 2 && previous.platform === 'darwin' && previous.arch === arch && JSON.stringify(previous.wheels) === JSON.stringify(wheels) && previous.files?.length > 100;
 if (ready) for (const file of previous.files) if (!await valid(path.join(destination, file.path), file.sha256, file.bytes)) { ready = false; break; }
 if (!ready) {
   const py = await download(`https://github.com/astral-sh/python-build-standalone/releases/download/20250409/${sources.python[0]}`, `python-macos-${arch}.tar.gz`, sources.python[1], null, sources.python[2]);
@@ -67,7 +67,7 @@ if (!ready) {
   const nativeDir = path.join(cache, `native-macos-${arch}`); await extract(native, nativeDir);
   const bin = path.join(destination, 'engine/qwen_asr_gguf/inference/bin'); await mkdir(bin, { recursive: true });
   for (const file of await walk(nativeDir)) {
-    if (/^lib(?:llama|ggml(?:-base|-cpu|-metal|-blas)?|omp)(?:\.\d+)*\.dylib$/.test(path.basename(file))) await copyFile(file, path.join(bin, path.basename(file)));
+    if (/^lib(?:llama|ggml(?:-base|-cpu|-metal|-blas|-rpc)?|omp)(?:\.\d+)*\.dylib$/.test(path.basename(file))) await copyFile(file, path.join(bin, path.basename(file)));
     if (path.basename(file) === 'LICENSE') await copyFile(file, path.join(destination, 'llama-LICENSE.txt'));
   }
   for (const item of wheels) {
@@ -78,6 +78,15 @@ if (!ready) {
     await run('ditto', ['-x', '-k', wheel, packages]);
   }
 }
+const nativeBin = path.join(destination, 'engine/qwen_asr_gguf/inference/bin');
+for (const file of await walk(nativeBin)) {
+  if (!file.endsWith('.dylib')) continue;
+  const { stdout } = await run('otool', ['-L', file]);
+  for (const match of stdout.matchAll(/^\s+@(?:rpath|loader_path)\/([^\s]+)\s/gm)) {
+    try { await stat(path.join(nativeBin, match[1])); }
+    catch { throw new Error(`Unbundled macOS native dependency: ${match[1]}`); }
+  }
+}
 await prepareQwenEngine({ root, destination, download });
 await copyFile(path.join(root, 'src/native/qwen-worker.py'), path.join(destination, 'worker.py'));
 const files = [];
@@ -85,5 +94,5 @@ for (const file of await walk(destination)) {
   if (file === path.join(destination, 'manifest.json')) continue;
   files.push({ path: path.relative(destination, file), bytes: (await stat(file)).size, sha256: await digest(file) });
 }
-await writeFile(path.join(destination, 'manifest.json'), JSON.stringify({ platform: 'darwin', arch, model: 'Qwen3-ASR 0.6B INT4/Q4_K', sourceCommit: QWEN_SOURCE.commit, python: '3.12.10', llama: 'b11724', hashStage: 'before-platform-code-signing', sources, wheels, files }, null, 2));
+await writeFile(path.join(destination, 'manifest.json'), JSON.stringify({ platform: 'darwin', arch, runtimeRevision: 2, model: 'Qwen3-ASR 0.6B INT4/Q4_K', sourceCommit: QWEN_SOURCE.commit, python: '3.12.10', llama: 'b11724', hashStage: 'before-platform-code-signing', sources, wheels, files }, null, 2));
 console.log(`macOS ${arch} Qwen runtime and model ready; all input SHA-256 hashes verified.`);
