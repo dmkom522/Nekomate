@@ -2,7 +2,7 @@
 
 网课内容太难，节奏太快，想要问大模型老师说的话是什么意思，只好先截图，再倒回去转述原话，程序却因为没有课程的上下文回答不到点子上... Nekomate来帮你！从此不用截图，不用绞尽脑汁思考如何给模型网课的上下文信息，你的小猫同桌会帮你解决一切！
 
-Nekomate是你的小猫同桌，可以陪你一起听网课，当你遇到不懂的问题，直接问它：“ppt上的橙色矩形是什么意思？”，而不是“我现在正在上cs231n，刚刚老师在讲vit，结合画面告诉我老师‘.....这句话中的xxx是什么意思，前面他说.....’”。就像真的一直在陪你上课，它知道这节课在干什么，直接问它任何问题，然后等待它告诉你准确而清晰的答案！
+Nekomate是你的小猫同桌，可以陪你一起听网课，当你遇到不懂的问题，直接问它：“ppt上的橙色矩形是什么意思？”，而不是“我现在正在上...课，刚刚老师在讲...结合画面告诉我老师...这句话中的xxx是什么意思，前面他说.....”。就像真的一直在陪你上课，它知道这节课在干什么，也明白老师刚刚在讲什么，直接问它任何问题，然后等待它告诉你准确而清晰的答案！
 <div align="center">
 
 <img src="assets/nekomate.png" alt="Nekomate 小猫" width="112" />
@@ -10,7 +10,7 @@ Nekomate是你的小猫同桌，可以陪你一起听网课，当你遇到不懂
 <h1>Nekomate</h1>
 
 <p><strong>你的小猫同桌，一起听课吧！</strong></p>
-<p>看课时，点一下小猫，问清没懂的那一步。</p>
+<p>专注于问题本身，不再为上下文烦恼</p>
 
 <p>
   <img src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-8B7355?style=flat-square" alt="Windows 10 / 11 x64" />
@@ -32,7 +32,7 @@ Nekomate是你的小猫同桌，可以陪你一起听网课，当你遇到不懂
 
 ---
 
-听课遇到不懂的问题时，你可能只想问一句：“这个红色方块是什么意思？”但为了让模型明白，你得截图、回看视频、转述老师的话，再补上前面的背景。
+听课遇到不懂的问题时，你可能只想问一句：“老师刚说的...是什么意思？”但为了让模型明白，你得截图、回看视频、转述老师的话，再补上前面的背景。
 
 Nekomate 把这些准备放到后台：抽样读取你选择的课程窗口，在提问时截取当前画面，转写最近一段讲解，并把新增资料送入当前学习对话。你可以直接问问题，接着追问，不必每次从头介绍这节课。
 
@@ -40,7 +40,7 @@ Nekomate 把这些准备放到后台：抽样读取你选择的课程窗口，�
 
 <a id="preview"></a>
 
-## 桌面上的小猫，随时接住你的问题
+## 你的小猫同桌，就像真的在陪你上课
 
 <p align="center">
   <img src="docs/bubble.png" alt="Nekomate 聊天气泡，展示矩阵行变换的示例对话" width="440" />
@@ -54,7 +54,7 @@ Nekomate 把这些准备放到后台：抽样读取你选择的课程窗口，�
 
 ## 快速开始
 
-当前提供 **0.1 源码预览**，面向 **Windows 10/11 x64**。准备 Node.js 22+（建议 24），在终端运行：
+面向 **Windows 10/11 x64**。准备 Node.js 22+（建议 24），在终端运行：
 
 ```bash
 git clone https://github.com/dmkom522/Nekomate.git
@@ -73,7 +73,7 @@ Nekomate 不附带模型额度。API 或 CLI 的使用费用、账户权限与�
 
 <a id="features"></a>
 
-## 少一点搬运上下文，多一点专心听课
+## 从此，不用再搬运任何上下文，只需要认真听课
 
 | 功能 | 帮你做什么 |
 | --- | --- |
@@ -181,17 +181,15 @@ Nekomate 自有代码采用 [MIT License](LICENSE)。默认语音转写使用 [Q
 当前固定版本的 Qwen GGUF 推理实现尚未确认明确的再分发授权，因此默认关闭包含该实现的安装包自动发布；Qwen 模型的 Apache-2.0 许可不等于推理实现的许可。查验记录见[来源说明](assets/licenses/Qwen-GGUF-NOTICE.txt)。
 
 <div align="center">
-  <sub>留给那句“等等，这一步我没懂”。</sub>
+  <sub>把时间留给思考</sub>
 </div>
 
 ## 参与改进
 
-欢迎提交 Bug、课程场景和改进建议。反馈时提供操作系统、应用版本、问题复现步骤，以及是否使用声音。不要上传 API Key 或未经检查的学习记录。
+欢迎帮助改进 Nekomate！你可以[提交 issue](https://github.com/dmkom522/Nekomate/issues) 报告错误或建议功能，也可以[提交 pull request](https://github.com/dmkom522/Nekomate/pulls) 改进代码或文档。
 
-特别希望改进：更准确的片段选择、清晰的公式识别、长课记忆、可访问性和其他系统支持。详见 [贡献指南](CONTRIBUTING.md)。
+详见 [贡献指南](CONTRIBUTING.md)。
 
 Nekomate 自有代码使用 MIT License。第三方模型、推理实现和运行时适用各自条款，来源说明见 [第三方说明](assets/licenses/SPEECH-NOTICES.txt)。
 
-本地 Qwen 推理实现作为固定版本、校验摘要的构建依赖下载，不直接收录上游实现源码。已检查的 HaujetZhao 固定版本未找到独立 LICENSE 或明确的再分发许可；这与 Qwen 模型的 Apache-2.0 授权是两回事，查验事实见 [Qwen GGUF 来源说明](assets/licenses/Qwen-GGUF-NOTICE.txt)。默认 CI 运行测试，但不自动上传或发布包含该实现的安装包；维护者核实再分发授权后才能开启相应二进制发布步骤。仓库变量 `ALLOW_QWEN_BINARY_REDISTRIBUTION=true` 只控制工作流，不代表取得授权。
-
-Made for the moment you say “等等，这一步我没懂”。
+Made for the moment you say 。
