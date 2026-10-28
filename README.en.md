@@ -4,7 +4,7 @@
 
 # Nekomate
 
-Online lectures can be difficult and fast-paced. You want to ask an AI what the instructor meant, so you take a screenshot, rewind to quote them, and explain what came before—only to get an answer that misses the point because the model lacks the course context. Nekomate is here to help! No more taking screenshots by hand or struggling to explain the context of your lecture. Your little cat classmate has you covered!
+Online lectures can be tough and fast-paced. You just want to ask an AI what the instructor meant by a particular word, but first you have to take a screenshot, rewind the video, and quote the entire sentence—only to get an answer that misses the point because the model lacks the full course context… Nekomate is here to help! No more taking screenshots or racking your brain over how to explain the course context to an AI. Your little cat classmate has you covered!
 
 Nekomate is your little cat classmate, keeping you company during online classes. When something confuses you, just ask, “What does the orange rectangle on the slide mean?” You do not have to explain, “I'm taking a course on… The instructor was just talking about… Look at this screenshot and tell me what xxx means in that sentence. Earlier, they said…” Like a classmate sitting beside you, Nekomate follows the course and what the instructor was just explaining. Ask your question and get a clear, accurate explanation!
 
@@ -71,7 +71,7 @@ npm start
 Before the first launch from source, the local speech model and runtime are downloaded and verified, so an internet connection is required. You do not need to install Python separately. See the [license notes](#license) below for the binary release status.
 
 1. **Connect a model.** Right-click the cat to open API Settings, then choose a service, connection method, and model that supports image input. API connections use your own key; CLI tools must be installed and signed in beforehand. Save your configuration before starting a learning session.
-2. **Choose your course.** Select the browser, video player, or slide window you are watching, check the preview, and start learning. On Windows, you can choose whether to capture system audio.
+2. **Choose your course.** Select the browser, video player, or slide window you are watching, click hide, and your little cat will automatically start studying with you. On Windows, you can choose whether to capture system audio.
 3. **Ask directly.** Click the cat and type what you do not understand. A fresh screenshot is sent together with your question, and the answer appears progressively in the chat bubble.
 
 Nekomate does not include model credits. Usage fees, account permissions, and service limits are determined by your chosen API or CLI provider. See the [User Guide](docs/USER_GUIDE.md) for detailed instructions.
