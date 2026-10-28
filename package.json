@@ -1,6 +1,6 @@
 {
   "name": "nekomate",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Nekomate — 看懂每一步。可连接自选模型 API 的桌面课程助教。",
   "author": "dmkom522",
