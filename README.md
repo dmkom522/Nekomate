@@ -54,7 +54,7 @@ Nekomate 把这些准备放到后台：抽样读取你选择的课程窗口，�
 
 ## 快速开始
 
-面向 **Windows 10/11 x64**。准备 Node.js 22+（建议 24），在终端运行：
+面向 **Windows 10/11 x64**。直接在 release 中下载最新版本，或准备 Node.js 22+（建议 24），在终端运行：
 
 ```bash
 git clone https://github.com/dmkom522/Nekomate.git
