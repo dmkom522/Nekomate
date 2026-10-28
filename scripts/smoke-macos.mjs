@@ -25,7 +25,7 @@ try {
   report.checks.push('DMG mounts; app version and prompts match source; ad-hoc signature validates');
   const env = { ...process.env }; delete env.ELECTRON_RUN_AS_NODE;
   app = await electron.launch({ executablePath: path.join(bundle, 'Contents/MacOS/Nekomate'), env, timeout: 60000 });
-  const page = await app.firstWindow(); await page.waitForLoadState('load');
+  const page = await app.firstWindow(); await page.waitForURL(/\/index\.html$/); await page.waitForLoadState('load');
   await page.waitForFunction(() => Boolean(window.deskmate?.info));
   report.info = await page.evaluate(() => window.deskmate.info());
   assert.equal(report.info.platform, 'darwin'); assert.equal(report.info.version, expected.version); assert.equal(report.info.systemAudioSupported, true);

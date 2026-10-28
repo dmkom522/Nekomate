@@ -14,7 +14,7 @@ function workerEnvironment() {
   for (const name of ['SystemRoot','SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','HOME','USERPROFILE','LOCALAPPDATA','APPDATA','PROGRAMDATA','ProgramFiles','ProgramFiles(x86)','GGML_VK_VISIBLE_DEVICES','GGML_VK_DISABLE_F16']) {
     if (process.env[name]) env[name] = process.env[name];
   }
-  return { ...env, PYTHONIOENCODING: 'utf-8', OMP_NUM_THREADS: '2', OPENBLAS_NUM_THREADS: '2' };
+  return { ...env, ...(process.env.NEKOMATE_SPEECH_DIAGNOSTICS === '1' ? { NEKOMATE_SPEECH_DIAGNOSTICS: '1' } : {}), PYTHONIOENCODING: 'utf-8', OMP_NUM_THREADS: '2', OPENBLAS_NUM_THREADS: '2' };
 }
 
 export class LocalSpeech {
@@ -81,7 +81,7 @@ export class LocalSpeech {
           let child = this.child;
           if (!child) {
             child = this.spawnImpl(speechPythonPath(this.runtimeDir), ['-I', '-u', path.join(this.runtimeDir, 'worker.py'), mode], {
-              windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'], env: workerEnvironment(), cwd: this.runtimeDir,
+              windowsHide: true, stdio: ['pipe', 'pipe', process.env.NEKOMATE_SPEECH_DIAGNOSTICS === '1' ? 'inherit' : 'ignore'], env: workerEnvironment(), cwd: this.runtimeDir,
             });
             this.child = child;
             child.stdout.setEncoding('utf8'); let buffer = '';

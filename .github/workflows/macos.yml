@@ -42,6 +42,8 @@ jobs:
           grep -q '"warmed": true' .local/mac-native-load.json
       - run: npm run check
       - name: Test audio processing, protocol and math
+        env:
+          NEKOMATE_SPEECH_DIAGNOSTICS: '1'
         run: node --test tests/platform.test.mjs tests/local-speech.test.mjs tests/audio-buffer.test.mjs tests/incremental-audio.test.mjs tests/system-prompt.test.mjs tests/format.test.mjs
       - name: Build native DMG
         env:
