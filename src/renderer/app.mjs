@@ -482,6 +482,7 @@ async function startCapture(source) {
     newStream.getVideoTracks()[0].addEventListener('ended', () => { if (state.stream === newStream) { stopCapture(); toast('窗口共享已结束，已采集的内容仍可提问。'); } });
     state.startingCapture = false; state.checkingCapture = false; renderLearningControls(); $('pickerDialog').close();
     memory.retry(); readNextNote(); observeFrames(newStream); petStatus(); await startAudio();
+    if (audio && state.info.platform === 'darwin' && !newStream.getAudioTracks().some(track => track.readyState === 'live')) toast('未获得系统声音，请检查 macOS 的系统声音录制权限；本次仍可结合课程画面回答。');
   } catch (error) {
     newStream?.getTracks().forEach(track => track.stop());
     if (state.stream === newStream) await stopCapture({ cancelPending: false });
@@ -664,7 +665,7 @@ function applySettings(config) {
   if (previousKey !== chatConnectionKey()) { state.backendSession = null; state.acceptedTranscriptIds.clear(); }
   uiCopy($('audioHint'), state.info.systemAudioSupported
     ? (config.transcription?.useSelectedModel ? '保留最近两分钟录音，仅提问时交给所选模型转写。' : '保留最近两分钟录音，仅提问时在本机转写。')
-    : '当前版本在此系统仅启用画面采集；系统声音目前支持 Windows。');
+    : '当前系统仅启用画面采集；系统声音需要 Windows 或 macOS 14.2 及以上版本。');
   state.modelAvailable = undefined;
   const ready = modelReady(config);
   $('configDot').classList.toggle('ready', ready);

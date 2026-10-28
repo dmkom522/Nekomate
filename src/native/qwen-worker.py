@@ -5,12 +5,15 @@ import ctypes
 import io
 import json
 import os
+import re
 from pathlib import Path
 import sys
 import wave
 
 sys.stdout.reconfigure(encoding="utf-8")
 root = Path(__file__).resolve().parent
+sys.path[:0] = [str(root / 'packages'), str(root / 'engine')]
+is_macos = sys.platform == 'darwin'
 mode = sys.argv[1]
 if mode not in ("gpu", "cpu"):
     raise SystemExit(2)
@@ -42,14 +45,16 @@ llama.LlamaContext.__init__ = context
 
 engine = None
 devices = []
+gpu_layers = 0
+gpu_log_callback = None
 quiet = open(os.devnull, "w", encoding="utf-8")
 
 def initialize():
-    global engine, devices
+    global engine, devices, gpu_layers, gpu_log_callback
     if engine is not None:
         return False
     if mode == "gpu":
-        if "DmlExecutionProvider" not in ort.get_available_providers():
+        if not is_macos and "DmlExecutionProvider" not in ort.get_available_providers():
             raise RuntimeError("gpu-unavailable")
         llama.bind_llama_lib()
         lib = llama.ggml
@@ -61,9 +66,17 @@ def initialize():
         names.ggml_backend_dev_name.restype = ctypes.c_char_p
         devices = [names.ggml_backend_dev_name(lib.ggml_backend_dev_get(i)).decode("utf-8")
                    for i in range(lib.ggml_backend_dev_count())]
-        devices = [name for name in devices if name.startswith("Vulkan")]
+        devices = [name for name in devices if name.startswith(("Metal", "MTL", "Apple"))] if is_macos else [name for name in devices if name.startswith("Vulkan")]
         if not devices:
             raise RuntimeError("gpu-unavailable")
+        if is_macos:
+            def record_offload(_level, message, _data):
+                global gpu_layers
+                match = re.search(r'offloaded\s+(\d+)(?:/\d+)?\s+layers', message.decode('utf-8', errors='replace')) if message else None
+                if match:
+                    gpu_layers = max(gpu_layers, int(match.group(1)))
+            gpu_log_callback = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_char_p, ctypes.c_void_p)(record_offload)
+            llama.llama_log_set(gpu_log_callback, None)
     model = root / "model"
     for name, size in [("qwen3_asr_encoder_frontend.int4.onnx", 20343991),
                        ("qwen3_asr_encoder_backend.int4.onnx", 94750816),
@@ -74,11 +87,13 @@ def initialize():
         engine = QwenASREngine(ASREngineConfig(
             model_dir=str(model), encoder_frontend_fn="qwen3_asr_encoder_frontend.int4.onnx",
             encoder_backend_fn="qwen3_asr_encoder_backend.int4.onnx", llm_fn="qwen3_asr_llm.q4_k.gguf",
-            onnx_provider="DML" if mode == "gpu" else "CPU", llm_use_gpu=mode == "gpu",
+            onnx_provider="DML" if mode == "gpu" and not is_macos else "CPU", llm_use_gpu=mode == "gpu",
             enable_aligner=False, verbose=False))
-    if mode == "gpu" and any("DmlExecutionProvider" not in session.get_providers()
+    if mode == "gpu" and not is_macos and any("DmlExecutionProvider" not in session.get_providers()
                              for session in (engine.encoder.sess_fe, engine.encoder.sess_be)):
         raise RuntimeError("gpu-unavailable")
+    if mode == 'gpu' and is_macos and gpu_layers < 1:
+        raise RuntimeError('gpu-unavailable')
     return True
 
 while True:
@@ -113,7 +128,7 @@ while True:
                 raise ValueError("oversized-result")
             duration = len(samples) / 16000
             result = {"text": text, "source": "local", "model": "Qwen3-ASR 0.6B " + mode.upper(),
-                      "mode": mode, "devices": devices, "timing": "audio-window",
+                      "mode": mode, "devices": devices, "gpuLayers": gpu_layers, "encoderProvider": engine.encoder.sess_fe.get_providers()[0], "timing": "audio-window",
                       "segments": [{"start": 0, "end": duration, "text": text}] if text else []}
         else:
             raise ValueError("invalid-kind")

@@ -1,0 +1,89 @@
+name: macOS Preview Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: New macOS preview tag
+        required: true
+        default: v0.1.3-macos.1
+      publish:
+        description: Publish the tested DMGs as a prerelease
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/electron/install.js
+      - name: Prepare pinned native macOS speech runtime
+        run: npm run prepare:speech
+      - run: npm run check
+      - name: Test audio processing, protocol and math
+        run: node --test tests/platform.test.mjs tests/local-speech.test.mjs tests/audio-buffer.test.mjs tests/incremental-audio.test.mjs tests/system-prompt.test.mjs tests/format.test.mjs
+      - name: Build native DMG
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run dist:mac -- --${{ matrix.arch }}
+      - name: Verify actual DMG content, launch and local Chinese/English speech
+        run: node scripts/smoke-macos.mjs release/Nekomate-0.1.3-mac-${{ matrix.arch }}.dmg
+      - name: Hash installers
+        run: shasum -a 256 release/*.dmg > release/SHA256SUMS-mac-${{ matrix.arch }}.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nekomate-macos-${{ matrix.arch }}
+          path: |
+            release/*.dmg
+            release/SHA256SUMS-mac-*.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-evidence-${{ matrix.arch }}
+          path: test-results/
+          if-no-files-found: ignore
+
+  publish:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nekomate-macos-*
+          merge-multiple: true
+          path: release
+      - name: Publish verified macOS preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_REVISION: ${{ github.sha }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-macos\.[0-9]+$ ]] || exit 1
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo 'This preview already exists; its files will not be overwritten.'
+            exit 1
+          fi
+          cat release/SHA256SUMS-mac-*.txt > release/SHA256SUMS-macos.txt
+          gh release create "$RELEASE_TAG" release/*.dmg release/SHA256SUMS-macos.txt --target "$RELEASE_REVISION" --title 'Nekomate v0.1.3 — macOS Preview' --notes-file docs/MACOS_RELEASE_NOTES.md --prerelease

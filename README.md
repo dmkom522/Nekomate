@@ -58,7 +58,7 @@ Nekomate 把这些准备放到后台：抽样读取你选择的课程窗口，�
 
 ## 快速开始
 
-面向 **Windows 10/11 x64**。直接在 release 中下载最新版本，或准备 Node.js 22+（建议 24），在终端运行：
+提供 **Windows 10/11 x64** 和 **macOS 14.2+ 预览版**（Apple Silicon / Intel）。[Windows 安装包](https://github.com/dmkom522/Nekomate/releases/tag/v0.1.2) · [Mac 预览版](https://github.com/dmkom522/Nekomate/releases/tag/v0.1.3-macos.1)。也可准备 Node.js 22+（建议 24），在终端运行：
 
 ```bash
 git clone https://github.com/dmkom522/Nekomate.git
@@ -144,7 +144,7 @@ Nekomate 没有自建云端、用户账号或遥测。截图、问题和转写�
 <details>
 <summary><strong>支持 macOS、Linux 吗？</strong></summary>
 
-目前以 Windows x64 为目标。仓库保留其他平台的构建入口，但本地转写运行时、画面采集和系统声音尚未完成这些平台的适配验收。
+提供 Windows x64 和 macOS 14.2+ 预览版，Mac 分 Apple Silicon 与 Intel 两种安装包，并内置本地转写。首次在 Mac 使用时，需要允许屏幕录制和系统声音录制。Mac 预览版的签名、验证范围和已知边界见 [Mac 发布说明](docs/MACOS_RELEASE_NOTES.md)。Linux 尚未完成适配验收。
 
 </details>
 

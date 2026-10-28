@@ -10,6 +10,7 @@ import { prepareQwenEngine, QWEN_SOURCE } from './prepare-qwen-engine.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const destination=path.join(root,'.local/qwen-speech'),cache=path.join(root,'.local/qwen-downloads'),benchmark=path.join(root,'.local/qwen-benchmark');
 const run=promisify(execFile);
+if(process.platform==='darwin') { await import('./prepare-macos-speech.mjs');process.exit(0); }
 if(process.platform!=='win32'||process.arch!=='x64') { console.log('Qwen bundled runtime currently targets Windows x64.');process.exit(0); }
 async function digest(file){const hash=createHash('sha256');for await(const chunk of createReadStream(file))hash.update(chunk);return hash.digest('hex');}
 async function valid(file,hash,bytes){try{return (!bytes||(await stat(file)).size===bytes)&&await digest(file)===hash;}catch{return false;}}

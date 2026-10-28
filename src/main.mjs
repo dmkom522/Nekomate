@@ -17,6 +17,7 @@ import { LearningSessions } from './core/learning-session.mjs';
 import { PendingFrames } from './core/pending-frames.mjs';
 import { randomUUID } from 'node:crypto';
 import { translate, translateMessage, normalizeLanguage } from './core/i18n.mjs';
+import { supportsSystemAudio } from './core/platform.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const pagePath = path.join(root, 'renderer', 'index.html');
@@ -150,7 +151,7 @@ async function withRequest(id, work) {
 }
 
 function installHandlers() {
-  handle('app:info', () => ({ version: app.getVersion(), platform: process.platform, systemAudioSupported: process.platform === 'win32', language: normalizeLanguage(config.language) }));
+  handle('app:info', () => ({ version: app.getVersion(), platform: process.platform, systemAudioSupported: supportsSystemAudio(), language: normalizeLanguage(config.language) }));
   handle('cli:inspect', value => inspectLocalCli(value));
   handle('cli:models', (id, value) => withRequest(id, signal => listCliModels(value, { signal })));
   handle('api:models', (id, target, value) => {
@@ -189,7 +190,7 @@ function installHandlers() {
   handle('sources:select', ({ id, audio }) => {
     if (!modelReady(config)) throw new Error('请先选择并保存支持图片输入的模型，再开始学习');
     if (!availableSources.has(id)) throw new Error('窗口已不可用，请刷新窗口列表');
-    selectedSource = { source: availableSources.get(id), audio: Boolean(audio) && process.platform === 'win32', expires: Date.now() + 15000 };
+    selectedSource = { source: availableSources.get(id), audio: Boolean(audio) && supportsSystemAudio(), expires: Date.now() + 15000 };
     return true;
   });
   const modelTask = (id, input, task, legacy, streaming = false) => {

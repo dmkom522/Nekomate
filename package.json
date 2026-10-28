@@ -1,6 +1,6 @@
 {
   "name": "nekomate",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Nekomate — 看懂每一步。可连接自选模型 API 的桌面课程助教。",
   "author": "dmkom522",
@@ -76,9 +76,20 @@
     },
     "mac": {
       "target": "dmg",
+      "icon": "assets/nekomate-1024.png",
+      "minimumSystemVersion": "14.2.0",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "notarize": false,
       "category": "public.app-category.education",
+      "extraResources": [{
+        "from": ".local/qwen-speech",
+        "to": "qwen-speech",
+        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"]
+      }],
       "extendInfo": {
-        "NSScreenCaptureUsageDescription": "Nekomate 使用您选择的窗口画面作为课程问答的上下文。"
+        "NSScreenCaptureUsageDescription": "Nekomate 使用您选择的窗口画面作为课程问答的上下文。",
+        "NSAudioCaptureUsageDescription": "Nekomate 仅在您开始学习并启用声音时采集系统声音，在本机转写最近两分钟的课程讲解。"
       }
     },
     "linux": {

@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { decodeSpeechWav } from './speech-wav.mjs';
+import { speechPythonPath } from './platform.mjs';
 
 export const defaultSpeechRuntimeDir = () => process.resourcesPath && import.meta.url.includes('app.asar')
   ? path.join(process.resourcesPath, 'qwen-speech')
@@ -10,7 +11,7 @@ export const defaultSpeechModelDir = () => path.join(defaultSpeechRuntimeDir(), 
 
 function workerEnvironment() {
   const env = {};
-  for (const name of ['SystemRoot','SYSTEMROOT','WINDIR','TEMP','TMP','USERPROFILE','LOCALAPPDATA','APPDATA','PROGRAMDATA','ProgramFiles','ProgramFiles(x86)','GGML_VK_VISIBLE_DEVICES','GGML_VK_DISABLE_F16']) {
+  for (const name of ['SystemRoot','SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','HOME','USERPROFILE','LOCALAPPDATA','APPDATA','PROGRAMDATA','ProgramFiles','ProgramFiles(x86)','GGML_VK_VISIBLE_DEVICES','GGML_VK_DISABLE_F16']) {
     if (process.env[name]) env[name] = process.env[name];
   }
   return { ...env, PYTHONIOENCODING: 'utf-8', OMP_NUM_THREADS: '2', OPENBLAS_NUM_THREADS: '2' };
@@ -79,7 +80,7 @@ export class LocalSpeech {
         try {
           let child = this.child;
           if (!child) {
-            child = this.spawnImpl(path.join(this.runtimeDir, 'python', 'python.exe'), ['-I', '-u', path.join(this.runtimeDir, 'worker.py'), mode], {
+            child = this.spawnImpl(speechPythonPath(this.runtimeDir), ['-I', '-u', path.join(this.runtimeDir, 'worker.py'), mode], {
               windowsHide: true, stdio: ['pipe', 'pipe', 'ignore'], env: workerEnvironment(), cwd: this.runtimeDir,
             });
             this.child = child;

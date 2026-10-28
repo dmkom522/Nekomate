@@ -59,7 +59,7 @@ Click the cat to open the chat, then close the bubble to keep watching. Right-cl
 
 ## Quick start
 
-For **Windows 10/11 x64**. Download the latest version from Releases, or install Node.js 22+ (24 recommended) and run the following in a terminal:
+Available for **Windows 10/11 x64** and as a **macOS 14.2+ preview** for Apple Silicon and Intel. [Windows download](https://github.com/dmkom522/Nekomate/releases/tag/v0.1.2) · [Mac preview](https://github.com/dmkom522/Nekomate/releases/tag/v0.1.3-macos.1). You can also install Node.js 22+ (24 recommended) and run the following in a terminal:
 
 ```bash
 git clone https://github.com/dmkom522/Nekomate.git
@@ -145,7 +145,7 @@ Pending screenshots, learning records, and session data are stored locally. Subm
 <details>
 <summary><strong>Are macOS and Linux supported?</strong></summary>
 
-Windows x64 is the current target. The repository includes build entry points for other platforms, but the local transcription runtime, screen capture, and system audio have not yet completed compatibility testing on those platforms.
+Windows x64 and a macOS 14.2+ preview are available. The Mac preview has separate Apple Silicon and Intel installers and includes local transcription. On first use, grant screen recording and system audio recording permission in macOS. See the [Mac release notes](docs/MACOS_RELEASE_NOTES.md) for signing, verification scope, and known limitations. Linux compatibility has not yet been verified.
 
 </details>
 

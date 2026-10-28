@@ -123,6 +123,8 @@ export const ENGLISH = Object.freeze({
   '保留最近两分钟录音，仅提问时交给所选模型转写。': 'Keeps the latest two minutes of audio and transcribes it with the selected model when you ask.',
   '保留最近两分钟录音，仅提问时在本机转写。': 'Keeps the latest two minutes of audio and transcribes it locally when you ask.',
   '当前版本在此系统仅启用画面采集；系统声音目前支持 Windows。': 'This system supports screenshots only. System audio capture is currently available on Windows.',
+  '当前系统仅启用画面采集；系统声音需要 Windows 或 macOS 14.2 及以上版本。': 'Screen capture only on this system. System audio requires Windows or macOS 14.2 or later.',
+  '未获得系统声音，请检查 macOS 的系统声音录制权限；本次仍可结合课程画面回答。': 'No system audio was received. Check the system audio recording permission in macOS; you can still ask about the course screen.',
   '正在读取模型…': 'Loading models…',
   '切换模型': 'Switch model',
   '未读取到模型，点击旁边刷新': 'No models loaded. Click refresh to try again',

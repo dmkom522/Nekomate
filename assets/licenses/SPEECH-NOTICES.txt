@@ -17,6 +17,12 @@ Pinned source: e790e3bfe9c1c52453da1166df236950a8a8b036.
 
 llama.cpp b11724, ggml-org. MIT; see llama.cpp-LICENSE.txt.
 ONNX Runtime DirectML, Microsoft. MIT; see ONNX-Runtime-LICENSE.txt.
+macOS uses ONNX Runtime CPU (with Metal decoder support supplied by llama.cpp).
 CPython 3.12.10, Python Software Foundation; see Python-LICENSE.txt.
+macOS CPython distributions: astral-sh/python-build-standalone, release 20250409.
+https://github.com/astral-sh/python-build-standalone/releases/tag/20250409
+Native macOS archive checksums and dependency wheel hashes are pinned in the
+build scripts and copied into the runtime manifest. The standalone distribution's
+bundled notices and the wheel dist-info license files are preserved in the runtime.
 Other dependency notices are in qwen-speech/packages/*.dist-info, and runtime file hashes are in qwen-speech/manifest.json.
 The application's MIT license does not replace third-party terms.
