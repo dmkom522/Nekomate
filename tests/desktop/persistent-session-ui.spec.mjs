@@ -7,6 +7,10 @@ async function launchFixture(kind = 'codex') {
   const profile = await mkdtemp(path.resolve('.local/session-ui-test-'));
   const env = { ...process.env, DESKMATE_TEST_DIR: profile }; delete env.ELECTRON_RUN_AS_NODE;
   const app = await electron.launch({ args: ['.'], env, executablePath: process.env.DESKMATE_ELECTRON_PATH });
+  // Main-process handlers must finish registering before the fixture replaces them.
+  await expect.poll(() => app.windows().some(window => window.url().endsWith('/index.html'))).toBe(true);
+  const page = app.windows().find(window => window.url().endsWith('/index.html'));
+  await page.waitForLoadState('load');
   await app.evaluate(({ ipcMain }, kind) => {
     const fixture = globalThis.sessionUiFixture = { kind, calls: [], bindings: new Map(), blocked: new Map(), wavs: [] };
     const config = { mode: kind === 'api' ? 'api' : 'cli', cli: { kind: 'codex', path: '', model: 'vision-fixture' },
@@ -52,8 +56,6 @@ async function launchFixture(kind = 'codex') {
       return { text: `第${fixture.wavs.length}段转写：矩阵消元。` };
     });
   }, kind);
-  await expect.poll(() => app.windows().some(window => window.url().endsWith('/index.html'))).toBe(true);
-  const page = app.windows().find(window => window.url().endsWith('/index.html'));
   await page.reload();
   await expect(page.locator('#chatModel')).toHaveValue('vision-fixture');
   await showPanel(app, page);

@@ -2,6 +2,7 @@ import { test, expect, _electron as electron } from '@playwright/test';
 import { mkdir, mkdtemp, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
+import { taskInstructions } from '../../src/core/prompts.mjs';
 
 const colors = { blue: '#2355c9', green: '#28b04f', red: '#c93828' };
 const partsOf = payload => payload.messages.findLast(message => message.role === 'user')?.content ?? [];
@@ -12,7 +13,7 @@ async function modelService() {
     if (req.method === 'GET' && req.url.endsWith('/models')) { res.end(JSON.stringify({ data: [{ id: 'pending-vision', input_modalities: ['image'] }] })); return; }
     let body = ''; for await (const chunk of req) body += chunk;
     const payload = JSON.parse(body), parts = partsOf(payload), task = parts.filter(part => part.type === 'text').map(part => part.text).join('\n');
-    const answer = task.includes('本次任务：回答用户的学习问题');
+    const answer = task.startsWith(taskInstructions('answer'));
     const row = { payload, task, answer, images: parts.filter(part => part.type === 'image_url').map(part => part.image_url.url),
       contextImages: payload.messages.flatMap(message => Array.isArray(message.content) ? message.content.filter(part => part.type === 'image_url').map(part => part.image_url.url) : []), arrived: Date.now() };
     service.requests.push(row);

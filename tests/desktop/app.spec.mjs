@@ -2,6 +2,7 @@ import { test, expect, _electron as electron } from '@playwright/test';
 import { mkdtemp, readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
+import { taskInstructions } from '../../src/core/prompts.mjs';
 
 async function companion(app, fullPanel = true) {
   await expect.poll(() => app.windows().some(page => page.url().endsWith('/pet.html'))).toBe(true);
@@ -59,7 +60,7 @@ async function mockService({ failFirstImage = false } = {}) {
     const body = Buffer.concat(chunks), audio = req.url.endsWith('/audio/transcriptions');
     const payload = audio ? null : JSON.parse(body);
     const images = latestUserParts(payload).filter(p => p.type === 'image_url').map(p => p.image_url.url);
-    const task = latestTask(payload), answer = task.includes('本次任务：回答用户的学习问题');
+    const task = latestTask(payload), answer = task.startsWith(taskInstructions('answer'));
     const item = { path: req.url, headers: req.headers, body, payload, images, contextImages: canonicalFrameImages(payload), answer, task, arrived: Date.now() }; requests.push(item);
     if (images.length && failFirstImage) { failFirstImage = false; res.writeHead(503); res.end('{}'); return; }
     if (hold && (holdTask ? task.includes(holdTask) : images.length)) { hold = false; blocked = item; await new Promise(resolve => { release = resolve; }); }
@@ -375,16 +376,18 @@ test('sampling uses real 30-second spacing, suppresses static slides, and a new 
       const canvas = document.createElement('canvas'); canvas.width = 640; canvas.height = 360;
       const ctx = canvas.getContext('2d'); let frame = 0;
       window.drawCourse = () => { ctx.fillStyle = frame++ % 2 ? 'white' : 'black'; ctx.fillRect(0, 0, 640, 360); };
-      window.drawCourse(); window.changingCourse = setInterval(window.drawCourse, 1100);
+      window.drawCourse();
       navigator.mediaDevices.getDisplayMedia = async () => canvas.captureStream(10);
     });
     await page.locator('#chooseBtn').click(); await page.locator('.source-card').first().click();
     const notes = () => service.requests.filter(r => r.task?.includes('本次任务：后台读取'));
+    await expect.poll(() => notes().length).toBe(1);
+    // Change once, then keep exactly that slide still through both sampling windows.
+    await page.evaluate(() => window.drawCourse());
     await expect.poll(() => notes().length, { timeout: 40000 }).toBe(2);
     const frames = notes();
     expect(frames[1].arrived - frames[0].arrived).toBeGreaterThanOrEqual(29500);
     expect(frames[1].images[0]).not.toBe(frames[0].images[0]);
-    await page.evaluate(() => clearInterval(window.changingCourse));
     await new Promise(resolve => setTimeout(resolve, 32000));
     expect(notes()).toHaveLength(2);
     const saved = await savedSession(page);

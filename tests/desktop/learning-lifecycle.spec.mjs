@@ -2,6 +2,7 @@ import { test, expect, _electron as electron } from '@playwright/test';
 import { mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
+import { taskInstructions } from '../../src/core/prompts.mjs';
 
 const lastUserParts = payload => payload.messages.findLast(message => message.role === 'user')?.content ?? [];
 const lastTask = payload => lastUserParts(payload).filter(part => part.type === 'text').map(part => part.text).join('\n');
@@ -32,7 +33,8 @@ async function localModel() {
     const images = lastUserParts(payload).filter(part => part.type === 'image_url');
     const allImages = payload.messages.flatMap(message => Array.isArray(message.content) ? message.content.filter(part => part.type === 'image_url') : []);
     const instructions = lastTask(payload);
-    const task = instructions.includes('本次任务：根据新对话初期') ? 'course-context' : instructions.includes('本次任务：回答用户的学习问题') ? 'answer' : 'visual-note';
+    const task = ['course-context', 'answer', 'visual-note'].find(kind => instructions.startsWith(taskInstructions(kind)));
+    if (!task) throw new Error('Test service received an unrecognized learning task');
     const text = task === 'course-context' ? `COURSE_${course}_BACKGROUND_ONLY：线性代数课程，先修矩阵运算。` : task === 'answer' ? `COURSE_${course}_ANSWER_ONLY：解释本课程的第二行。` : `COURSE_${course}_NOTES_ONLY：本课程的矩阵消元笔记。`;
     const item = { payload, images, allImages, task, text }; requests.push(item);
     if (payload.stream) {
