@@ -95,7 +95,7 @@ npm run test:desktop
 npm run dist:win
 ```
 
-产物在 `release/`。当前 Windows 构建未配置商业签名。macOS 和 Linux 构建命令仅作为开发入口，跨平台运行需要各平台测试；macOS 分发还需要签名及公证。
+产物在 `release/`。当前 Windows 构建未配置商业签名。macOS 预览版需要在相应架构的原生 Mac 上构建：Apple Silicon 使用 `npm run dist:mac -- --arm64`，Intel 使用 `npm run dist:mac -- --x64`。构建前会下载并校验相应的独立 Python、ONNX Runtime 和 llama.cpp 动态库，与同一组 Qwen 模型一起打包。Mac 预览版采用 ad-hoc 签名，尚无 Developer ID 证书或 Apple 公证。`macos.yml` 工作流按需构建两种架构并挂载实际 DMG，检查包内应用启动与本地语音；只有两种构建都通过且手动选择发布时才上传预览版。Linux 尚需平台适配与测试。
 
 GitHub Actions：
 

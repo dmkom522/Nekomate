@@ -10,7 +10,8 @@ export const defaultSpeechRuntimeDir = () => process.resourcesPath && import.met
 export const defaultSpeechModelDir = () => path.join(defaultSpeechRuntimeDir(), 'model');
 
 function workerEnvironment() {
-  const env = {};
+  // The native loader appends its library directory to PATH during import.
+  const env = { PATH: process.env.PATH || process.env.Path || '/usr/bin:/bin' };
   for (const name of ['SystemRoot','SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','HOME','USERPROFILE','LOCALAPPDATA','APPDATA','PROGRAMDATA','ProgramFiles','ProgramFiles(x86)','GGML_VK_VISIBLE_DEVICES','GGML_VK_DISABLE_F16']) {
     if (process.env[name]) env[name] = process.env[name];
   }
