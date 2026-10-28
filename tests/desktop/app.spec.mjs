@@ -377,6 +377,8 @@ test('sampling uses real 30-second spacing, suppresses static slides, and a new 
       const ctx = canvas.getContext('2d'); let frame = 0;
       window.drawCourse = () => { ctx.fillStyle = frame++ % 2 ? 'white' : 'black'; ctx.fillRect(0, 0, 640, 360); };
       window.drawCourse();
+      // Keep publishing video frames without changing the slide's pixel content.
+      setInterval(() => ctx.fillRect(0, 0, 640, 360), 100);
       navigator.mediaDevices.getDisplayMedia = async () => canvas.captureStream(10);
     });
     await page.locator('#chooseBtn').click(); await page.locator('.source-card').first().click();
